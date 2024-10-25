@@ -92,10 +92,10 @@ function Install_ct() {
   check_file
   check_sys
   # check_new_ver
-  rm -rf gost-"$ct_new_ver"-linux-"$bit".tar.gz
-  wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v"$ct_new_ver"/gost-"$ct_new_ver"-linux-"$bit".tar.gz
-  tar -zxvf gost-"$ct_new_ver"-linux-"$bit".tar.gz
-  mv gost-"$ct_new_ver"-linux-"$bit" gost
+  rm -rf gost_"$ct_new_ver"_linux_"$bit".tar.gz
+  wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v"$ct_new_ver"/gost_"$ct_new_ver"_linux_"$bit".tar.gz
+  tar -zxvf gost_"$ct_new_ver"_linux_"$bit".tar.gz
+  mv gost_"$ct_new_ver"_linux_"$bit" gost
   mv gost /usr/bin/gost
   chmod -R 777 /usr/bin/gost
   wget --no-check-certificate https://raw.githubusercontent.com/luu0731/Multi-EasyGost/refs/heads/v2/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
