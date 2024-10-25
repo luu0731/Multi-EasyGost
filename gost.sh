@@ -3,7 +3,7 @@ Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_p
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
 shell_version="1.1.1"
-ct_new_ver="2.11.2" # 2.x 不再跟随官方更新
+ct_new_ver="2.12.0" # 2.x 不再跟随官方更新
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -65,7 +65,7 @@ function check_new_ver() {
   # deprecated
   ct_new_ver=$(wget --no-check-certificate -qO- -t2 -T3 https://api.github.com/repos/ginuerzh/gost/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g')
   if [[ -z ${ct_new_ver} ]]; then
-    ct_new_ver="2.11.2"
+    ct_new_ver="2.12.0"
     echo -e "${Error} gost 最新版本获取失败，正在下载v${ct_new_ver}版"
   else
     echo -e "${Info} gost 目前最新版本为 ${ct_new_ver}"
@@ -92,28 +92,14 @@ function Install_ct() {
   check_file
   check_sys
   # check_new_ver
-  echo -e "若为国内机器建议使用大陆镜像加速下载"
-  read -e -p "是否使用？[y/n]:" addyn
-  [[ -z ${addyn} ]] && addyn="n"
-  if [[ ${addyn} == [Yy] ]]; then
-    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost-linux-"$bit"-"$ct_new_ver".gz
-    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
-    mv gost-linux-"$bit"-"$ct_new_ver" gost
-    mv gost /usr/bin/gost
-    chmod -R 777 /usr/bin/gost
-    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-    mkdir /etc/gost && wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
-  else
-    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-    wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v"$ct_new_ver"/gost-linux-"$bit"-"$ct_new_ver".gz
-    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
-    mv gost-linux-"$bit"-"$ct_new_ver" gost
-    mv gost /usr/bin/gost
-    chmod -R 777 /usr/bin/gost
-    wget --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-    mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
-  fi
+  rm -rf gost-"$ct_new_ver"-linux-"$bit".tar.gz
+  wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v"$ct_new_ver"/gost-"$ct_new_ver"-linux-"$bit".tar.gz
+  tar -zxvf gost-"$ct_new_ver"-linux-"$bit".tar.gz
+  mv gost-"$ct_new_ver"-linux-"$bit" gost
+  mv gost /usr/bin/gost
+  chmod -R 777 /usr/bin/gost
+  wget --no-check-certificate https://raw.githubusercontent.com/luu0731/Multi-EasyGost/refs/heads/v2/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
+  mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/luu0731/Multi-EasyGost/refs/heads/v2/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
 
   systemctl enable gost && systemctl restart gost
   echo "------------------------------"
@@ -871,30 +857,6 @@ cron_restart() {
   fi
 }
 
-update_sh() {
-  ol_version=$(curl -L -s --connect-timeout 5 https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
-  if [ -n "$ol_version" ]; then
-    if [[ "$shell_version" != "$ol_version" ]]; then
-      echo -e "存在新版本，是否更新 [Y/N]?"
-      read -r update_confirm
-      case $update_confirm in
-      [yY][eE][sS] | [yY])
-        wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
-        echo -e "更新完成"
-        exit 0
-        ;;
-      *) ;;
-
-      esac
-    else
-      echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
-    fi
-  else
-    echo -e "                 ${Red_font_prefix}脚本最新版本获取失败，请检查与github的连接！${Font_color_suffix}"
-  fi
-}
-
-update_sh
 echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefix}[${shell_version}]${Font_color_suffix}"
   ----------- KANIKIG -----------
   特性: (1)本脚本采用systemd及gost配置文件对gost进行管理
